@@ -13,7 +13,8 @@ function convertToString(string $codes)
             !preg_match("/^([0,2-9])\\1*$/u", $code) // check if all digits(0,2-9) are the same
             || strlen($code) > MAX_NUMBER_COUNT + 1 // check if number of digits is less than max possible
             || ($code[0] === "0" && strlen($code) > 1) // 0 must the only one
-            || (strlen($code) > MAX_NUMBER_COUNT && $code[0] !== "7" && $code[0] !== "9")
+            || (strlen($code) > MAX_NUMBER_COUNT 
+            && $code[0] !== "7" && $code[0] !== "9") // length check for numbers except 7 and 9
         ) {
             throw new Exception("Invalid code: $code");
         }
@@ -67,9 +68,21 @@ function convertToNumeric(string $str)
 echo convertToNumeric("Ela nie ma kota") . "\n"; // 33,555,2,0,66,444,33,0,6,2,0,55,666,8,2
 
 echo convertToString("33,555,2,0,66,444,33,0,6,2,0,55,666,8,2") . "\n"; // ela nie ma kota
+echo convertToString("5,2,22,555,33,222,9999,66,444,55") . "\n"; // jablecznik
 echo convertToString("777,0,7777,0,8,88,888,0,9,99,999,9999,0") . "\n";
 
 echo convertToString(convertToNumeric("test z x y t")) . "\n";
+
+try {
+    echo convertToNumeric("45 Wrong string") . "\n"; 
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
+try {
+    echo convertToNumeric("Cyrillic letters: еіа") . "\n"; 
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
 
 try {
     echo convertToString("55,777,98") . "\n"; 
@@ -86,3 +99,5 @@ try {
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . "\n";
 }
+
+?>
