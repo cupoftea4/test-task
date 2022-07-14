@@ -4,12 +4,17 @@ const ORDER_OF_A = 97;
 const ORDER_OF_Z = 122;
 const ORDER_OF_S = 115;
 
-// converts old mobile keyboard codes for letters to normal string ("2,22,222") -> "abc"
+// converts old mobile keyboard codes for letters to normal string ('2,22,222') -> "abc"
 function convertToString(string $codes)
 {
     $result = "";
-    foreach (explode(',', $codes) as $code) {
-        if (!is_numeric($code)) {
+    foreach (explode(",", $codes) as $code) {
+        if (
+            !preg_match("/^([0,2-9])\\1*$/u", $code) // check if all digits(0,2-9) are the same
+            || strlen($code) > MAX_NUMBER_COUNT + 1 // check if number of digits is less than max possible
+            || ($code[0] === "0" && strlen($code) > 1) // 0 must the only one
+            || (strlen($code) > MAX_NUMBER_COUNT && $code[0] !== "7" && $code[0] !== "9")
+        ) {
             throw new Exception("Invalid code: $code");
         }
         if ($code === "0") {
@@ -29,17 +34,16 @@ function convertToString(string $codes)
     return $result;
 }
 
-// converts string to old mobile keyboard codes for letters ("abc") -> "2,22,222"
+// converts string to old mobile keyboard codes for letters ("abc") -> '2,22,222'
 function convertToNumeric(string $str)
 {
     $str = strtolower($str);
+    if (!preg_match('/^[\p{Latin}\s]+$/u', $str)) { // only latin letters and space
+        throw new Exception("Invalid string: $str");
+    }
     $last_index = strlen($str) - 1;
     $result = "";
     foreach (str_split($str) as $key => $char) {
-        if ((ord($char) > ORDER_OF_Z || ord($char) < ORDER_OF_A) 
-            && ord($char) != ord(" ")) {
-            throw new Exception("Please, use only latin letters");
-        }
         $char_order = ord($char) - ORDER_OF_A;
         if ($char === " ") {
             $result .= "0";
@@ -58,18 +62,27 @@ function convertToNumeric(string $str)
     return $result;
 }
 
-try {
-    echo convertToNumeric("Ela ni23e ma kota") . "\n"; // 33,555,2,0,66,444,33,0,6,2,0,55,666,8,2
-} catch(Exception $e) {
-    echo "Error: " . $e->getMessage() . "\n";
-}
+/* ---------------------------------------- TESTS ---------------------------------------- */
 
-try {
-    echo convertToString("5,2,22,55yy,33,222,9999,66,444,55") . "\n"; // jablecznik
-} catch(Exception $e) {
-    echo "Error: " . $e->getMessage() . "\n";
-}
+echo convertToNumeric("Ela nie ma kota") . "\n"; // 33,555,2,0,66,444,33,0,6,2,0,55,666,8,2
+
+echo convertToString("33,555,2,0,66,444,33,0,6,2,0,55,666,8,2") . "\n"; // ela nie ma kota
+echo convertToString("777,0,7777,0,8,88,888,0,9,99,999,9999,0") . "\n";
 
 echo convertToString(convertToNumeric("test z x y t")) . "\n";
 
-?>
+try {
+    echo convertToString("55,777,98") . "\n"; 
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
+try {
+    echo convertToString("00,1,33,8") . "\n"; 
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
+try {
+    echo convertToString("4444,88,2") . "\n"; 
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
