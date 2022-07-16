@@ -7,8 +7,6 @@ var usersArr = [
     { username: "Kamila Wiśniewska", birthYear: 1972, salary: 6800 },
 ];
 
-welcomeUsers(usersArr);
-
 const welcomeUsers = array => {
     array.forEach(user => {
         if (user.salary > 15000) {
@@ -23,3 +21,6 @@ W tym roku kończysz ${new Date().getFullYear() - user.birthYear} lat!`);
         }
     });
 }
+
+welcomeUsers(usersArr);
+
